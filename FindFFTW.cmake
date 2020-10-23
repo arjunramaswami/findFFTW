@@ -78,11 +78,19 @@ if( FFTW_ROOT )
   )
 
   find_library(
-          FFTW_DOUBLE_OPENMP_LIB
-          NAMES "fftw3_omp"
-          PATHS ${FFTW_ROOT}
-          PATH_SUFFIXES "lib" "lib64"
-          NO_DEFAULT_PATH
+    FFTW_DOUBLE_OPENMP_LIB
+    NAMES "fftw3_omp"
+    PATHS ${FFTW_ROOT}
+    PATH_SUFFIXES "lib" "lib64"
+    NO_DEFAULT_PATH
+  )
+
+  find_library(
+    FFTW_DOUBLE_MPI_LIB
+    NAMES "fftw3_mpi"
+    PATHS ${FFTW_ROOT}
+    PATH_SUFFIXES "lib" "lib64"
+    NO_DEFAULT_PATH
   )
 
   find_library(
@@ -102,11 +110,19 @@ if( FFTW_ROOT )
   )
 
   find_library(
-          FFTW_FLOAT_OPENMP_LIB
-          NAMES "fftw3f_omp"
-          PATHS ${FFTW_ROOT}
-          PATH_SUFFIXES "lib" "lib64"
-          NO_DEFAULT_PATH
+    FFTW_FLOAT_OPENMP_LIB
+    NAMES "fftw3f_omp"
+    PATHS ${FFTW_ROOT}
+    PATH_SUFFIXES "lib" "lib64"
+    NO_DEFAULT_PATH
+  )
+
+  find_library(
+    FFTW_FLOAT_MPI_LIB
+    NAMES "fftw3f_mpi"
+    PATHS ${FFTW_ROOT}
+    PATH_SUFFIXES "lib" "lib64"
+    NO_DEFAULT_PATH
   )
 
   find_library(
@@ -141,6 +157,12 @@ if( FFTW_ROOT )
     NO_DEFAULT_PATH
   )
 
+  find_path(FFTW_MPI_INCLUDE_DIRS
+    NAMES "fftw3-mpi.h"
+    PATHS ${FFTW_ROOT}
+    PATH_SUFFIXES "include"
+    NO_DEFAULT_PATH
+  )
 else()
 
   find_library(
@@ -156,9 +178,15 @@ else()
   )
 
   find_library(
-          FFTW_DOUBLE_OPENMP_LIB
-          NAMES "fftw3_omp"
-          PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+    FFTW_DOUBLE_OPENMP_LIB
+    NAMES "fftw3_omp"
+    PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+  )
+
+  find_library(
+    FFTW_DOUBLE_MPI_LIB
+    NAMES "fftw3_mpi"
+    PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
   )
 
   find_library(
@@ -174,9 +202,15 @@ else()
   )
 
   find_library(
-          FFTW_FLOAT_OPENMP_LIB
-          NAMES "fftw3f_omp"
-          PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+    FFTW_FLOAT_OPENMP_LIB
+    NAMES "fftw3f_omp"
+    PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+  )
+
+  find_library(
+    FFTW_FLOAT_MPI_LIB
+    NAMES "fftw3f_mpi"
+    PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
   )
 
   find_library(
@@ -201,6 +235,10 @@ else()
     PATHS ${PKG_FFTW_INCLUDE_DIRS} ${INCLUDE_INSTALL_DIR}
   )
 
+  find_path(FFTW_MPI_INCLUDE_DIRS
+    NAMES "fftw3-mpi.h"
+    PATHS ${PKG_FFTW_INCLUDE_DIRS} ${INCLUDE_INSTALL_DIR}
+  )
 endif( FFTW_ROOT )
 
 #--------------------------------------- components
@@ -313,6 +351,30 @@ else()
   set(FFTW_LONGDOUBLE_OPENMP_LIB_FOUND FALSE)
 endif()
 
+if (FFTW_DOUBLE_MPI_LIB)
+  set(FFTW_DOUBLE_MPI_LIB_FOUND TRUE)
+  set(FFTW_LIBRARIES ${FFTW_LIBRARIES} ${FFTW_DOUBLE_MPI_LIB})
+  add_library(FFTW::DoubleMPI INTERFACE IMPORTED)
+  set_target_properties(FFTW::DoubleMPI
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${FFTW_MPI_INCLUDE_DIRS}"
+               INTERFACE_LINK_LIBRARIES "${FFTW_DOUBLE_MPI_LIB}"
+  )
+else()
+  set(FFTW_DOUBLE_MPI_LIB_FOUND FALSE)
+endif()
+
+if (FFTW_FLOAT_MPI_LIB)
+  set(FFTW_FLOAT_MPI_LIB_FOUND TRUE)
+  set(FFTW_LIBRARIES ${FFTW_LIBRARIES} ${FFTW_FLOAT_MPI_LIB})
+  add_library(FFTW::FloatMPI INTERFACE IMPORTED)
+  set_target_properties(FFTW::FloatMPI
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${FFTW_MPI_INCLUDE_DIRS}"
+               INTERFACE_LINK_LIBRARIES "${FFTW_FLOAT_MPI_LIB}"
+  )
+else()
+  set(FFTW_FLOAT_MPI_LIB_FOUND FALSE)
+endif()
+
 #--------------------------------------- end components
 
 set( CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES_SAV} )
@@ -336,4 +398,6 @@ mark_as_advanced(
         FFTW_FLOAT_OPENMP_LIB
         FFTW_DOUBLE_OPENMP_LIB
         FFTW_LONGDOUBLE_OPENMP_LIB
+        FFTW_FLOAT_MPI_LIB
+        FFTW_DOUBLE_MPI_LIB
         )
